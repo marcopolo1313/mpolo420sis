@@ -1,1 +1,233 @@
 
+# Búsqueda Coste Uniforme - Uniform Cost Search
+from Nodos import Nodo
+
+def Comparar(nodo):
+    return nodo.get_costo()
+
+def busqueda_BCU(conecciones, estado_inicial, solucion):
+    resuelto = False
+    nodos_visitados = []
+    nodos_frontera = []
+    nodo_raiz = Nodo(estado_inicial)
+    nodo_raiz.set_costo(0)
+    nodos_frontera.append(nodo_raiz)
+    while (not resuelto) and len(nodos_frontera) != 0:
+        # Ordenar lista de nodos frontera
+        nodos_frontera = sorted(nodos_frontera, key=Comparar)
+        nodo_actual = nodos_frontera[0]
+        # Extraer nodo y añadirlo a visitados
+        nodos_visitados.append(nodos_frontera.pop(0))
+        if nodo_actual.get_estado() == solucion:
+            # Solucion encontrada
+            resuelto = True
+            return nodo_actual
+        else:
+            # Expandir nodos hijo (ciudades con conexion)
+            datos_nodo = nodo_actual.get_estado()
+            lista_hijos = []
+            for achild in conecciones[datos_nodo]:
+                hijo = Nodo(achild)
+                costo = conecciones[datos_nodo][achild]
+                hijo.set_costo(nodo_actual.get_costo() + costo)
+                lista_hijos.append(hijo)
+                if not hijo.en_lista(nodos_visitados):
+                    # Si está en la lista lo sustituimos con el nuevo valor de coste si es menor
+                    if hijo.en_lista(nodos_frontera):
+                        for n in nodos_frontera:
+                            if n.equal(hijo) and n.get_costo() > hijo.get_costo():
+                                nodos_frontera.remove(n)
+                                nodos_frontera.append(hijo)
+                    else:
+                        nodos_frontera.append(hijo)
+            nodo_actual.set_hijo(lista_hijos)
+
+
+if __name__ == "__main__":
+    conecciones = {
+        'Cobija': {'Zofra': 14},
+        'Zofra': {'Cobija': 14,'Porvenir':17,'Nareuda':41},
+        'Nareuda': {'Zofra': 41},
+        'Porvenir': {'Zofra': 17,'Puerto Rico':135,'Chive':153},
+        'Chive': {'Porvenir': 153,'Ixiamas':226},
+        'Ixiamas': {'Chive': 226,'Tumupasa':62},
+        'Tumupasa': {'Rurrenabaque': 53,'Ixiamas':62,'Apolo':125},
+        'Apolo':{'Tumupasa':125,'Mapiri':123,'Charazani':142},
+        'Charazani':{'Apolo':142,'Escoma':87},
+        'Escoma':{'Charazani':87,'Achacachi':75},
+        'Achacachi':{'Escoma':75,'Huarina':18},
+        'Huarina':{'Tiquina':38,'Achacachi':18,'La Paz':56},
+        'Tiquina':{'Huarina':38,'Copacabana':38},
+        'Copacabana':{'Tiquina':38},
+        'La Paz':{'Huarina':56,'Santa Barbara':97,'Patacamaya':81,'Unduavi':45,'Desaguadero':95},
+        'Desaguadero':{'La Paz':95},
+        'Unduavi':{'La Paz':45,'Chulumani':73,'Coroico':108},
+        'Coroico':{'Unduavi':108},
+        'Chulumani':{'Unduavi':73,'Pte Sacambaya':203},
+        'Pte Sacambaya':{'Chulumani':203,'Quillacollo':180},
+        'Patacamaya':{'La Paz':81,'Caracollo':88,'Hito XVIII':188,'Totora':216,'Turco':268},
+        'Hito XVIII':{'Patacamaya':188},
+        'Totora':{'Patacamaya':216,'La Joya':65},
+        'Turco':{'Patacamaya':268,'Ancaravi':56},
+        'La Joya':{'Totora':65,'Oruro':50},
+        'Ancaravi':{'Turco':56,'Toledo':56,'Huachacalla':70},
+        'Huachacalla':{'Ancaravi':70,'Pisiga':70},
+        'Pisiga':{'Huachacalla':70},
+        'Toledo':{'Ancaravi':56,'Oruro':36},
+        'Caracollo':{'Patacamaya':88,'Oruro':30,'Confital':72},
+        'Oruro':{'La Joya':50,'Toledo':36,'Caracollo':30,'Confital':36,'Machacamarquita':18},
+        'Confital':{'Caracollo':72,'Parotani':79,'Oruro':36},
+        'Parotani':{'Suticollo':12,'Confital':79},
+        'Suticollo':{'Parotani':12,'Vinto':8},
+        'Vinto':{'Suticollo':8,'Quillacollo':5},
+        'Quillacollo':{'Pte Sacambaya':180,'Vinto':5,'Cochabamba':8},
+        'Cochabamba':{'Quillacollo':8},
+        'Mapiri':{'Apolo':123,'Guanay':99},
+        'Guanay':{'Mapiri':99,'Quiquibey':243,'Santa Barbara':70},
+        'Quiquibey':{'Yucumo':39,'Santa Barbara':173},
+        'Santa Barbara':{'Guanay':70,'Quiquibey':173,'La Paz':97},
+        'Rurrenabaque': {'Tumupasa': 53,'Santa Rosa':96,'Yucumo':101},
+        'Santa Rosa': {'Rurrenabaque': 96,'Australia':169},
+        'Australia': {'Santa Rosa': 169,'El Choro':169},
+        'El Choro': {'Australia': 169,'Puente Madre de Dios':120,'Riberalta':71},
+        'Puente Madre de Dios': {'El Choro': 120,'Puerto Rico':83},
+        'Puerto Rico': {'Porvenir': 135,'Puente Madre de Dios':83},
+        'Riberalta': {'El Choro': 71,'Guayaramerin':84},
+        'Guayaramerin': {'Riberalta': 84,'La Moroña':327},
+        'La Moroña': {'Guayaramerin': 327,'Pto Ustarez':75,'San Ramon':54},
+        'Pto Ustarez':{'La Moroña':75},
+        'San Ramon': {'La Moroña': 54,'Trinidad':210},
+        'Trinidad': {'San Ramon': 210,'San Ignacio de Moxos':49,'Casarabe':52},
+        'Casarabe':{'Trinidad':52},
+        'San Ignacio de Moxos': {'Trinidad': 49,'Monte Grande':76,'San Borja':134},
+        'Monte Grande':{'San Ignacio de Moxos':76},
+        'San Borja': {'San Ignacio de Moxos': 134,'Yucumo':51},
+        'Yucumo': {'San Borja': 51,'Rurrenabaque':101,'Quiquibey':39},
+        
+        'Sacaba':{'Vinto':28,'Colomi':33},
+        'Colomi':{'Sacaba':33,'Villa Tunari':114},
+        'Villa Tunari':{'Colomi':114,'Isinuta':47,'Ivirgarzama':60},
+        'Isinuta':{'Villa Tunari':47},
+        'Ivirgarzama':{'Villa Tunari':60,'Puerto Villarroel':26,'Yapacani':64},
+        'Puerto Villarroel':{'Ivirgarzama':26},
+        'Yapacani':{'Ivirgarzama':64,'La Enconada':48,'Guabira':67},
+        'La Enconada':{'Yapacani':48},
+        'Guabira':{'Yapacani':67,'Saavedra':12,'Montero':4,'Okinawa':41},
+        'Saavedra':{'Guabira':12,'Chane':29},
+        'Chane':{'Aguaices':15,'Saavedra':29},
+        'Aguaices':{'Chane':15,'Colonia Pirai':74},
+        'Colonia Pirai':{'Aguaices':74},
+        'Okinawa':{'Guabira':41,'Los Troncos':34},
+        'Los Troncos':{'Okinawa':34,'San Ramon':56,'Cuatro Cañadas':26},
+        'San Ramon':{'Los Troncos':56,'Ascencion De Guarayos':119,'Rio Uruguaito':142},
+        'Ascencion De Guarayos':{'San Ramon':119,'San Pablo':112},
+        'San Pablo':{'Ascencion De Guarayos':112,'Casarabe':85},
+        'Casarabe':{'San Pablo':85,'Trinidad':52},
+
+        'Rio Uruguaito':{'San Ramon':142,'Santa Rosa de la Roca':49},
+        'Santa Rosa de la Roca':{'Rio Uruguaito':49,'San Ignacio de Velasco':82},
+        'San Ignacio de Velasco':{'Santa Rosa de la Roca':82,'San Miguel':36,'San Matias':308},
+        'San Matias':{'San Ignacio de Velasco':308},
+        'San Miguel':{'San Ignacio de Velasco':36,'San Jose de Chiquitos':168,'Cuatro Cañadas':230},
+        'Cuatro Cañadas':{'San Miguel':230,'Los Troncos':26,'Paraiso':38},
+        'Paraiso':{'Cuatro Cañadas':38,'El Tinto':125,'Cotoca':41},
+        'El Tinto':{'Paraiso':125,'Quimome':37},
+        'Quimome':{'El Tinto':37,'San Jose de Chiquitos':49},
+        'San Jose de Chiquitos':{'Quimome':49,'Robore':128},
+        'Robore':{'San Jose de Chiquitos':128,'El Carmen':138},
+        'El Carmen':{'Robore':138,'Puerto Suarez':89},
+        'Puerto Suarez':{'El Carmen':89,'Puerto Bush':138},
+        'Puerto Bush':{'Puerto Suarez':138},
+        'Cotoca':{'Paraiso':41,'Santa Cruz':20},
+        'Santa Cruz':{'Cotoca':20,'Warnes':31,'La Guardia':20},
+        'Warnes':{'Santa Cruz':31,'Montero':21},
+        'Montero':{'Warnes':21,'Guabira':4},
+        'La Guardia':{'Samaipata':99,'Santa Cruz':20,'Abapo':133},
+        'Samaipata':{'La Guardia':99,'Mataral':67},
+        'Mataral':{'Samaipata':67,'Vallegrande':53,'La Palizada':32},
+        'La Palizada':{'Mataral':32,'Comarapa':21,'Pte Taperas':42},
+        'Comarapa':{'La Palizada':21,'Epizana':131},
+        'Epizana':{'Comarapa':131,'Paracaya':85},
+        'Paracaya':{'Epizana':85,'Cochabamba':46,'Cruce Vacas':29},
+        'Cruce Vacas':{'Paracaya':29,'Mizque':79},
+        'Mizque':{'Cruce Vacas':79,'Aiquile':42},
+        'Aiquile':{'Mizque':42,'Pte Taperas':88,'Puente Arce':48},
+        'Pte Taperas':{'Aiquile':88,'La Palizada':42},
+        'Puente Arce':{'Aiquile':48,'Puente Sacramento':52},
+        'Puente Sacramento':{'Puente Arce':52,'Sucre':35},
+        'Sucre':{'Puente Sacramento':35,'Ravelo':45,'Puente Mendez':43,'Tarabuco':61},
+        'Ravelo':{'Sucre':45,'Lluchu':62},
+        'Lluchu':{'Ravelo':62,'Chacapuco':63},
+        'Chacapuco':{'Lluchu':63,'Llallagua':64},
+        'Llallagua':{'Chacapuco':64,'Huanuni':42},
+        'Huanuni':{'Llallagua':42,'Machacamarquita':22},
+        'Machacamarquita':{'Huanuni':22,'Oruro':18,'Challapata':92},
+
+    'Challapata':{'Machacamarquita':92,'Ventila':91,'Condo K':18},
+    'Ventila':{'Challapata':91,'Potosi':102},
+    'Potosi':{'Ventila':102,'Puente Mendez':107,'Uyuni':203,'Kucho Ingenio':39},
+    'Puente Mendez':{'Potosi':107,'Sucre':43},
+    'Condo K':{'Challapata':18,'Uyuni':168},
+    'Uyuni':{'Condo K':168,'Potosi':203,'Atocha':102,'Hito LX':257},
+    'Hito LX':{'Uyuni':257},
+    'Atocha':{'Uyuni':102,'Tupiza':102},
+    'Tupiza':{'Atocha':102,'Hornillos':16,'Villazon':91},
+    'Villazon':{'Tupiza':91},
+    'Hornillos':{'Tupiza':16,'Santiago Cotagaita':63,'El Puente':96},
+    'Santiago Cotagaita':{'Hornillos':16,'Tumusla':40},
+    'Tumusla':{'Santiago Cotagaita':40,'Kucho Ingenio':89},
+    'Kucho Ingenio':{'Tumusla':89,'Potosi':39,'Lecori':70},
+    'Lecori':{'Kucho Ingenio':70,'El Puente':140},
+    'El Puente':{'Lecori':140,'San Lorencito':46,'Lecori':140},
+    'San Lorencito':{'El Puente':46,'Iscayachi':11,'Cr Norte':37},
+    'Iscayachi':{'San Lorencito':11,'Tarija':47},
+    'Cr Norte':{'San Lorencito':37,'Tarija':19},
+    'Tarija':{'Iscayachi':47,'Cr Norte':19,'Canaletas':58,'Concepcion':9},
+    'Concepcion':{'Tarija':9,'Canaletas':67,'Padcaya':34},
+    'Padcaya':{'Concepcion':34,'Bermejo':143},
+    'Bermejo':{'Padcaya':143},
+    'Canaletas':{'Tarija':58,'Entre Rios':41,'Concepcion':67},
+    'Entre Rios':{'Canaletas':41,'Palos Blancos':75},
+    'Palos Blancos':{'Entre Rios':75,'Villamontes':70,'Carapari':63},
+    'Carapari':{'Palos Blancos':63,'Campo Pajoso':19,'Sidras':62},
+    'Sidras':{'Carapari':62},
+    'Campo Pajoso':{'Yacuiba':11,'Villamontes':77},
+    'Yacuiba':{'Campo Pajoso':11,'San Jose de Pocitos':7},
+    'San Jose de Pocitos':{'Yacuiba':7},
+    'Villamontes':{'Campo Pajoso':77,'Palos Blancos':70,'Palo Marcado':46,'Boyuibe':98},
+    'Palo Marcado':{'Villamontes':46,'Hito BR94':70},
+    'Hito BR94':{'Palo Marcado'},
+    'Boyuibe':{'Villamontes':98,'Hito Villazon':127,'Cruce Ipati':94,'El Espino':192},
+    'Hito Villazon':{'Boyuibe':127},
+    'Cruce Ipati':{'Boyuibe':94,'Muyupampa':46,'Ipita':51},
+    'Muyupampa':{'Cruce Ipati':46,'Monteagudo':49},
+    'Monteagudo':{'Muyupampa':49,'El Salto':69},
+    'El Salto':{'Monteagudo':69,'Padilla':49},
+    'Padilla':{'El Salto':49,'Zudañez':69},
+    'Zudañez':{'Padilla':69,'Tarabuco':41},
+    'Tarabuco':{'Zudañez':41,'Sucre':61},
+
+    'Ipita':{'Cruce Ipati':51,'Abapo':57,'Guadalupe':181},
+    'Abapo':{'Ipita':57,'El Espino':38,'La Guardia':133},
+    'El Espino':{'Abapo':38,'Boyuibe':192},
+    'Guadalupe':{'Santa Rosa':76,'Vallegrande':6},
+    'Vallegrande':{'Guadalupe':6,'Mataral':53}
+        
+        
+        
+        
+       
+    }
+    estado_inicial = 'Desaguadero'
+    solucion = 'Sucre'
+    nodo_solucion = busqueda_BCU(conecciones, estado_inicial, solucion)
+    # Mostrar resultado
+    resultado = []
+    nodo = nodo_solucion
+    while nodo.get_padre() is not None:
+        resultado.append(nodo.get_estado())
+        nodo = nodo.get_padre()
+    resultado.append(estado_inicial)
+    resultado.reverse()
+    print(resultado)
+    print("Costo: %s" % str(nodo_solucion.get_costo()))
